@@ -55,12 +55,18 @@ namespace PatientPortal.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("PatientId,Name,Sex,Age,BloodType,PastHistory,City,State,Reports")] Patient patient)
+        public async Task<IActionResult> Create(string IsFamilyDonorAvailable, [Bind("PatientId,Name,Sex,Age,BloodType,PastHistory,City,State,Reports")] Patient patient)
         {
             if (ModelState.IsValid)
             {
                 _context.Add(patient);
+                
                 await _context.SaveChangesAsync();
+
+                if (Convert.ToBoolean(IsFamilyDonorAvailable))
+                {
+                    return RedirectToAction("Create", "Donors", new { familyPatientId = patient.PatientId });
+                }
                 return RedirectToAction(nameof(Index));
             }
             return View(patient);

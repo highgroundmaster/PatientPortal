@@ -7,6 +7,7 @@
 <h1>Create</h1>
 
 <h4>Donor</h4>
+<h4>Related to Patient - @ViewBag.FamilyPatientName</h4>
 <hr />
 <div class="row">
     <div class="col-md-4">
@@ -51,10 +52,6 @@
                 <label asp-for="PatientRelation" class="control-label"></label>
                 <input asp-for="PatientRelation" class="form-control" />
                 <span asp-validation-for="PatientRelation" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="FamilyPatientId" class="control-label"></label>
-                <select asp-for="FamilyPatientId" class ="form-control" asp-items="ViewBag.FamilyPatientId"></select>
             </div>
             <div class="form-group">
                 <input type="submit" value="Create" class="btn btn-primary" />

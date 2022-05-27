@@ -45,9 +45,22 @@ namespace PatientPortal.Controllers
         }
 
         // GET: Donors/Create
-        public IActionResult Create()
+        public async Task<IActionResult> Create(ulong familyPatientId)
         {
-            ViewData["FamilyPatientId"] = new SelectList(_context.Patients, "PatientId", "PatientId");
+            if (_context.Patients == null)  
+            {
+                return NotFound();
+            }
+
+            var patient = await _context.Patients.FirstOrDefaultAsync(m => m.PatientId == familyPatientId);
+            if (patient == null)
+            {
+                return NotFound();
+            }
+            ViewData["FamilyPatientName"] = patient.Name;
+
+            TempData["FamilyPatientId"] = familyPatientId.ToString();
+            
             return View();
         }
 
@@ -56,15 +69,29 @@ namespace PatientPortal.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("DonorId,Name,Sex,Age,BloodType,PastHistory,City,State,PatientRelation,FamilyPatientId")] Donor donor)
+        public async Task<IActionResult> Create([Bind("DonorId,Name,Sex,Age,BloodType,PastHistory,City,State,PatientRelation")] Donor donor)
         {
+            
+            if (TempData["FamilyPatientId"] != null)
+            {
+                donor.FamilyPatientId = Convert.ToUInt64(TempData["FamilyPatientId"]);
+               
+                var patient = await _context.Patients.FirstOrDefaultAsync(m => m.PatientId == donor.FamilyPatientId);
+                if (patient == null)
+                {
+                    return NotFound();
+                }
+                donor.FamilyPatient = patient;
+
+            }
             if (ModelState.IsValid)
             {
                 _context.Add(donor);
+
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["FamilyPatientId"] = new SelectList(_context.Patients, "PatientId", "PatientId", donor.FamilyPatientId);
+            //ViewData["FamilyPatientId"] = new SelectList(_context.Patients, "PatientId", "PatientId", donor.FamilyPatientId);
             return View(donor);
         }
 
