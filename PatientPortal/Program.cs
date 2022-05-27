@@ -1,4 +1,14 @@
+using Microsoft.EntityFrameworkCore;
+using PatientPortal.Models;
+
 var builder = WebApplication.CreateBuilder(args);
+
+// Connection String
+var connectionString = builder.Configuration.GetConnectionString("Default");
+builder.Services.AddDbContext<PatientPortalContext>(options =>
+{
+    options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
+});
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
