@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Configuration;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 
@@ -9,6 +8,7 @@ namespace PatientPortal.Models
     public partial class PatientPortalContext : DbContext
     {
         public IConfigurationRoot Configuration { get; }
+
         public PatientPortalContext()
         {
         }
@@ -21,6 +21,7 @@ namespace PatientPortal.Models
         public virtual DbSet<Donor> Donors { get; set; } = null!;
         public virtual DbSet<Patient> Patients { get; set; } = null!;
         public virtual DbSet<Swap> Swaps { get; set; } = null!;
+        public virtual DbSet<Userinfo> Userinfos { get; set; } = null!;
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -109,6 +110,37 @@ namespace PatientPortal.Models
                     .HasForeignKey(d => d.PatientId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("PatientId");
+            });
+
+            modelBuilder.Entity<Userinfo>(entity =>
+            {
+                entity.HasKey(e => e.UserId)
+                    .HasName("PRIMARY");
+
+                entity.ToTable("userinfo");
+
+                entity.HasIndex(e => e.PatientId, "PatientId_idx");
+
+                entity.HasIndex(e => e.UserId, "UserId_UNIQUE")
+                    .IsUnique();
+
+                entity.Property(e => e.UserId).ValueGeneratedNever();
+
+                entity.Property(e => e.EmailId).HasMaxLength(45);
+
+                entity.Property(e => e.Password).HasMaxLength(300);
+
+                entity.Property(e => e.PhoneNumber).HasMaxLength(45);
+
+                entity.Property(e => e.UserName).HasMaxLength(200);
+
+                entity.Property(e => e.Salt).HasMaxLength(500);
+
+                entity.HasOne(d => d.Patient)
+                    .WithMany(p => p.Userinfos)
+                    .HasForeignKey(d => d.PatientId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("UserPatientId");
             });
 
             OnModelCreatingPartial(modelBuilder);

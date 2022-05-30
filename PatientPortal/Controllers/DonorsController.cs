@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using PatientPortal.Models;
@@ -47,7 +43,7 @@ namespace PatientPortal.Controllers
         // GET: Donors/Create
         public async Task<IActionResult> Create(ulong familyPatientId)
         {
-            if (_context.Patients == null)  
+            if (_context.Patients == null)
             {
                 return NotFound();
             }
@@ -60,7 +56,7 @@ namespace PatientPortal.Controllers
             ViewData["FamilyPatientName"] = patient.Name;
 
             TempData["FamilyPatientId"] = familyPatientId.ToString();
-            
+
             return View();
         }
 
@@ -71,11 +67,11 @@ namespace PatientPortal.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("DonorId,Name,Sex,Age,BloodType,PastHistory,City,State,PatientRelation")] Donor donor)
         {
-            
+
             if (TempData["FamilyPatientId"] != null)
             {
                 donor.FamilyPatientId = Convert.ToUInt64(TempData["FamilyPatientId"]);
-               
+
                 var patient = await _context.Patients.FirstOrDefaultAsync(m => m.PatientId == donor.FamilyPatientId);
                 if (patient == null)
                 {
@@ -181,14 +177,14 @@ namespace PatientPortal.Controllers
             {
                 _context.Donors.Remove(donor);
             }
-            
+
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
         private bool DonorExists(ulong id)
         {
-          return (_context.Donors?.Any(e => e.DonorId == id)).GetValueOrDefault();
+            return (_context.Donors?.Any(e => e.DonorId == id)).GetValueOrDefault();
         }
     }
 }

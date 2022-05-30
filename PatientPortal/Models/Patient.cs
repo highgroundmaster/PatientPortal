@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
-
 namespace PatientPortal.Models
 {
     public partial class Patient
@@ -11,10 +10,10 @@ namespace PatientPortal.Models
         {
             Donors = new HashSet<Donor>();
             Swaps = new HashSet<Swap>();
+            Userinfos = new HashSet<Userinfo>();
         }
 
         public ulong PatientId { get; set; }
-
         [StringLength(200)]
         public string Name { get; set; } = null!;
 
@@ -25,9 +24,12 @@ namespace PatientPortal.Models
         public int Age { get; set; }
 
         [PatientBloodTypeValidation]
+        [Display(Name = "Blood Type")]
+
         public string BloodType { get; set; } = null!;
 
         [StringLength(300)]
+        [Display(Name = "Past History")]
         public string? PastHistory { get; set; }
 
 
@@ -40,6 +42,7 @@ namespace PatientPortal.Models
 
         public virtual ICollection<Donor> Donors { get; set; }
         public virtual ICollection<Swap> Swaps { get; set; }
+        public virtual ICollection<Userinfo> Userinfos { get; set; }
     }
 
     public class PatientBloodTypeValidation : ValidationAttribute

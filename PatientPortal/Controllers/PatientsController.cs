@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PatientPortal.Models;
 
@@ -21,9 +16,9 @@ namespace PatientPortal.Controllers
         // GET: Patients
         public async Task<IActionResult> Index()
         {
-              return _context.Patients != null ? 
-                          View(await _context.Patients.ToListAsync()) :
-                          Problem("Entity set 'PatientPortalContext.Patients'  is null.");
+            return _context.Patients != null ?
+                        View(await _context.Patients.ToListAsync()) :
+                        Problem("Entity set 'PatientPortalContext.Patients'  is null.");
         }
 
         // GET: Patients/Details/5
@@ -60,7 +55,7 @@ namespace PatientPortal.Controllers
             if (ModelState.IsValid)
             {
                 _context.Add(patient);
-                
+
                 await _context.SaveChangesAsync();
 
                 if (Convert.ToBoolean(IsFamilyDonorAvailable))
@@ -155,14 +150,14 @@ namespace PatientPortal.Controllers
             {
                 _context.Patients.Remove(patient);
             }
-            
+
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
         private bool PatientExists(ulong id)
         {
-          return (_context.Patients?.Any(e => e.PatientId == id)).GetValueOrDefault();
+            return (_context.Patients?.Any(e => e.PatientId == id)).GetValueOrDefault();
         }
     }
 }
