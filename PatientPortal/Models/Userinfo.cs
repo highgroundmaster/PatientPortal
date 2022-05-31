@@ -25,7 +25,7 @@ namespace PatientPortal.Models
         [Display(Name = "Phone Number (WhatsApp)")]
         public string PhoneNumber { get; set; } = null!;
         public ulong PatientId { get; set; }
-        public string salt { get; set; } = null!;
+        //public string Salt { get; set; } = null!;
         public virtual Patient Patient { get; set; } = null!;
     }
 }

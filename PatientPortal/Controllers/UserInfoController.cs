@@ -35,8 +35,8 @@ namespace PatientPortal.Controllers
                     var existingUser = await _context.Userinfos.FirstOrDefaultAsync(m => m.EmailId == user.EmailId);
                     if (existingUser == null)
                     {
-                        user.salt = UserPasswordHelper.GenerateSalt(user.Password.Length);
-                        user.Password = UserPasswordHelper.HashPassword(user.Password, user.salt);
+                        var salt = UserPasswordHelper.GenerateSalt(user.Password.Length);
+                        user.Password = UserPasswordHelper.HashPassword(user.Password, salt);
 
                         _context.Add(user);
                         _context.SaveChangesAsync();

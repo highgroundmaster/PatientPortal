@@ -134,8 +134,7 @@ namespace PatientPortal.Models
 
                 entity.Property(e => e.UserName).HasMaxLength(200);
 
-                entity.Property(e => e.Salt).HasMaxLength(500);
-
+                
                 entity.HasOne(d => d.Patient)
                     .WithMany(p => p.Userinfos)
                     .HasForeignKey(d => d.PatientId)

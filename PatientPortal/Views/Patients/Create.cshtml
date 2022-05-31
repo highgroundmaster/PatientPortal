@@ -5,60 +5,157 @@
     ViewData["Title"] = "Create";
 }
 
-<h1>Create</h1>
+<style>
+    
+.row{
+    background-color:white;
+    
+    
+}
+.slider{
+    width:300px;
+}
 
-<h4>Patient</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
+input {
+        border-top-color:white;
+        border-right-color: white ;
+        border-left-color:white;
+       
+        background-color:white;
+      }
+      
+      .form-control:focus {
+        outline: none;
+      }
+</style>
+
+<body style ="background-image: url('https://img.freepik.com/free-photo/young-handsome-physician-medical-robe-with-stethoscope_1303-17818.jpg?t=st=1653887268~exp=1653887868~hmac=b60f0c934d59c4affaa737ee026ca9e2c539017b48f3271f754b20eeac02cc45&w=740');">
+<h1>Create Patients</h1>
+
+
+
+<div class="row" style="border-radius:20px 20px;height:700px;opacity:0.9;">
+    <div class="col-md-4" style="margin-left:400px;border-radius:10px 25px;margin-top:0px; font-family:Baskerville Old Face;font-size:20px;">
         <form asp-action="Create">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
-                <label asp-for="Name" class="control-label"></label>
-                <input asp-for="Name" class="form-control" />
-                <span asp-validation-for="Name" class="text-danger"></span>
+                <label class="control-label"></label>
+                <input asp-for="Name" class="form-control" placeholder="Name" style="border-bottom-color:2px solid black;" />
+                <span class="text-danger"></span>
+
             </div>
             <div class="form-group">
-                <label asp-for="Sex" class="control-label"></label>
-                <input asp-for="Sex" class="form-control" />
-                <span asp-validation-for="Sex" class="text-danger"></span>
+                <label class="control-label"></label>
+                <div class="switch-toggle switch-3 switch-candy">
+
+                  <input id="on" name="state-d" type="radio" checked="" />
+                  <label for="on" onclick="">Male</label>
+
+                  <input id="na" name="state-d" type="radio" checked="checked" />
+                  <label for="na" class="disabled" onclick="">Female</label>
+
+                  <input id="off" name="state-d" type="radio" />
+                  <label for="off" onclick="">Other</label>
+
+                </div>
+                
+
+
+                <input asp-for="Sex" class="form-control"  placeholder="Sex" id="sex">
+                <img src="https://seekicon.com/free-icon-download/man_9.svg"width="30s" onclick="keyup()" value="Male" id="gender">
+                <img src="https://cdn.pixabay.com/photo/2016/04/16/10/33/woman-1332779_960_720.png" width="17" onclick="" value="Female" id="gender">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/69/Gender_Neutral_%2813777%29_-_The_Noun_Project.svg/512px-Gender_Neutral_%2813777%29_-_The_Noun_Project.svg.png?20180307024231" width="35" onclick="dosomething" value="Other" id="gender">
+
+                <span class="text-danger"></span>
             </div>
             <div class="form-group">
                 <label asp-for="Age" class="control-label"></label>
-                <input type="range" min="1" max="150" value="50" class="slider" name="Age" />
+                <input type="range" min="1" max="100" value="50" class="slider" name="Age" placeholder="Age" onchange="updateTextInput(this.value)"; style="margin-top:20px;"/>
+                <input type="text" id="textInput" value="">
                 <span asp-validation-for="Age" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="BloodType" class="control-label"></label>
-                <input asp-for="BloodType" class="form-control" />
-                <span asp-validation-for="BloodType" class="text-danger"></span>
+                <label  class="control-label"></label>
+                @*<input asp-for="BloodType" class="form-control" />*@
+                <select name="BG" id="BG" class="form-control"  placeholder="Blood Type">
+                    <option value="">Blood Group </option>
+                    <option value="A">A</option>
+                    <option value="B">B</option>
+                    <option value="AB">AB</option>
+                    <option value="O">O</option>
+                  
+                </select>
+                <span class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="PastHistory" class="control-label"></label>
-                <input asp-for="PastHistory" class="form-control" />
+                <label class="control-label"></label>
+                <input asp-for="PastHistory" class="form-control" placeholder="Past History"/>
                 <span asp-validation-for="PastHistory" class="text-danger"></span>
             </div>
+
             <div class="form-group">
-                <label asp-for="City" class="control-label"></label>
-                <input asp-for="City" class="form-control" />
-                <span asp-validation-for="City" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="State" class="control-label"></label>
-                <input asp-for="State" class="form-control" />
+                <label class="control-label"></label>
+                @*<input asp-for="State" class="form-control" placeholder="State" />*@
+                <select name="state" id="state" class="form-control" placeholder="State">
+          <option value ="">State</option>
+          <option value="Andhra Pradesh">Andhra Pradesh</option>
+          <option value="Andaman and Nicobar Islands">Andaman and Nicobar Islands</option>
+          <option value="Arunachal Pradesh">Arunachal Pradesh</option>
+          <option value="Assam">Assam</option>
+          <option value="Bihar">Bihar</option>
+          <option value="Chandigarh">Chandigarh</option>
+          <option value="Chhattisgarh">Chhattisgarh</option>
+          <option value="Dadar and Nagar Haveli">Dadar and Nagar Haveli</option>
+          <option value="Daman and Diu">Daman and Diu</option>
+          <option value="Delhi">Delhi</option>
+          <option value="Lakshadweep">Lakshadweep</option>
+          <option value="Puducherry">Puducherry</option>
+          <option value="Goa">Goa</option>
+          <option value="Gujarat">Gujarat</option>
+          <option value="Haryana">Haryana</option>
+          <option value="Himachal Pradesh">Himachal Pradesh</option>
+          <option value="Jammu and Kashmir">Jammu and Kashmir</option>
+          <option value="Jharkhand">Jharkhand</option>
+          <option value="Karnataka">Karnataka</option>
+          <option value="Kerala">Kerala</option>
+          <option value="Madhya Pradesh">Madhya Pradesh</option>
+          <option value="Maharashtra">Maharashtra</option>
+          <option value="Manipur">Manipur</option>
+          <option value="Meghalaya">Meghalaya</option>
+          <option value="Mizoram">Mizoram</option>
+          <option value="Nagaland">Nagaland</option>
+          <option value="Odisha">Odisha</option>
+          <option value="Punjab">Punjab</option>
+          <option value="Rajasthan">Rajasthan</option>
+          <option value="Sikkim">Sikkim</option>
+          <option value="Tamil Nadu">Tamil Nadu</option>
+          <option value="Telangana">Telangana</option>
+          <option value="Tripura">Tripura</option>
+          <option value="Uttar Pradesh">Uttar Pradesh</option>
+          <option value="Uttarakhand">Uttarakhand</option>
+          <option value="West Bengal">West Bengal</option>
+          </select>   
                 <span asp-validation-for="State" class="text-danger"></span>
             </div>
+
             <div class="form-group">
-                <label asp-for="Reports" class="control-label"></label>
-                <input asp-for="Reports" class="form-control" />
+                <label class="control-label"></label>
+                <input asp-for="City" class="form-control" placeholder="City"/>
+                <span asp-validation-for="City" class="text-danger"></span>
+            </div>
+            
+            <div class="form-group">
+                <label class="control-label"></label>
+
+                <input asp-for="Reports" class="form-control" placeholder="Reports" type="file" value="Reports"/>
                 <span asp-validation-for="Reports" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <label for="IsFamilyDonorAvailable" class="control-label">Do you have a potential family donor?</label>
-                <input type="checkbox"  name="IsFamilyDonorAvailable" value="true"/>  
+                <input type="checkbox"  name="IsFamilyDonorAvailable" value="true" placeholder="Do you have a Donor ?" style ="margin-top:15px;"/>  
             </div>
             <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
+                <input type="submit" value="Create" class="btn btn-primary" style ="margin-top:20px;"/>
             </div>
             
         </form>
@@ -69,6 +166,17 @@
 <div>
     <a asp-action="Index">Back to List</a>
 </div>
+<script>
+    function updateTextInput(val) {
+          document.getElementById('textInput').value=val; 
+        }
+</script>
+<script>
+    $('#gender').keyup(function(){
+    $('#sex').val(this.value);
+});
+</script>
+</body>
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}

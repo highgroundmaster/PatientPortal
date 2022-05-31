@@ -1,11 +1,12 @@
 using System.Security.Cryptography;
 using System.Text;
+using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 
 namespace PatientPortal.Helpers
 {
     public static class UserPasswordHelper  
     {  
-        public static string GenerateSalt(int maximumSaltLength) //length of salt    
+        public static byte[] GenerateSalt(int maximumSaltLength) //length of salt    
         {
             var salt = new byte[maximumSaltLength];
             using (var random = new RNGCryptoServiceProvider())
@@ -13,21 +14,23 @@ namespace PatientPortal.Helpers
                 random.GetNonZeroBytes(salt);
             }
 
-            return Convert.ToBase64String(salt); ;
+            return salt; ;
         }  
-        public static string HashPassword(string pass, string salt) //hash password with SHA256
+        public static string HashPassword(string pass, byte[] salt) //hash password with SHA256
         {  
-            byte[] saltBytes = Encoding.Unicode.GetBytes(salt);
-            byte[] plainText = Encoding.Unicode.GetBytes(pass);
-            byte[] hash = new byte[saltBytes.Length + plainText.Length];
+            return Convert.ToBase64String(KeyDerivation.Pbkdf2(
+                    password: pass,
+                    salt: salt,
+                    prf: KeyDerivationPrf.HMACSHA256,
+                    iterationCount: 100000,
+                    numBytesRequested: 256 / 8));
+            //HashAlgorithm algorithm = HashAlgorithm.Create("SHA2");
 
-            HashAlgorithm algorithm = HashAlgorithm.Create("SHA2");
-
-            System.Buffer.BlockCopy(saltBytes, 0, hash, 0, saltBytes.Length);  
-            System.Buffer.BlockCopy(plainText, 0, hash, saltBytes.Length, plainText.Length);
-            return Convert.ToBase64String(algorithm.ComputeHash(hash));
-
+            //System.Buffer.BlockCopy(saltBytes, 0, hash, 0, saltBytes.Length);  
+            //System.Buffer.BlockCopy(plainText, 0, hash, saltBytes.Length, plainText.Length);
+            
         }  
+
         public static string HashPasswordMd5(string pass) //Encrypt using MD5    
         {  
             Byte[] originalBytes;  
