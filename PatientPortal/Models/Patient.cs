@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace PatientPortal.Models
 {
@@ -10,10 +8,10 @@ namespace PatientPortal.Models
         {
             Donors = new HashSet<Donor>();
             Swaps = new HashSet<Swap>();
-            Userinfos = new HashSet<Userinfo>();
         }
 
         public ulong PatientId { get; set; }
+
         [StringLength(200)]
         public string Name { get; set; } = null!;
 
@@ -24,12 +22,9 @@ namespace PatientPortal.Models
         public int Age { get; set; }
 
         [PatientBloodTypeValidation]
-        [Display(Name = "Blood Type")]
-
         public string BloodType { get; set; } = null!;
 
         [StringLength(300)]
-        [Display(Name = "Past History")]
         public string? PastHistory { get; set; }
 
 
@@ -39,10 +34,11 @@ namespace PatientPortal.Models
         [StringLength(100)]
         public string State { get; set; } = null!;
         public byte[]? Reports { get; set; }
+        public ulong? PatientUserId { get; set; }
 
+        public virtual Userinfo PatientUser { get; set; } = null!;
         public virtual ICollection<Donor> Donors { get; set; }
         public virtual ICollection<Swap> Swaps { get; set; }
-        public virtual ICollection<Userinfo> Userinfos { get; set; }
     }
 
     public class PatientBloodTypeValidation : ValidationAttribute
@@ -72,3 +68,4 @@ namespace PatientPortal.Models
         }
     }
 }
+

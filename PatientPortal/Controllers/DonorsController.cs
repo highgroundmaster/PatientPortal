@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using PatientPortal.Models;
@@ -15,6 +16,7 @@ namespace PatientPortal.Controllers
         }
 
         // GET: Donors
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Index()
         {
             var patientPortalContext = _context.Donors.Include(d => d.FamilyPatient);
@@ -22,6 +24,7 @@ namespace PatientPortal.Controllers
         }
 
         // GET: Donors/Details/5
+        [Authorize(Roles = "Admin, User")]
         public async Task<IActionResult> Details(ulong? id)
         {
             if (id == null || _context.Donors == null)
@@ -41,6 +44,7 @@ namespace PatientPortal.Controllers
         }
 
         // GET: Donors/Create
+        [Authorize(Roles = "Admin, User")]
         public async Task<IActionResult> Create(ulong familyPatientId)
         {
             if (_context.Patients == null)
@@ -63,6 +67,7 @@ namespace PatientPortal.Controllers
         // POST: Donors/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        [Authorize(Roles = "Admin, User")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("DonorId,Name,Sex,Age,BloodType,PastHistory,City,State,PatientRelation")] Donor donor)
@@ -92,6 +97,7 @@ namespace PatientPortal.Controllers
         }
 
         // GET: Donors/Edit/5
+        [Authorize(Roles = "Admin, User")]
         public async Task<IActionResult> Edit(ulong? id)
         {
             if (id == null || _context.Donors == null)
@@ -111,6 +117,7 @@ namespace PatientPortal.Controllers
         // POST: Donors/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        [Authorize(Roles = "Admin, User")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(ulong id, [Bind("DonorId,Name,Sex,Age,BloodType,PastHistory,City,State,PatientRelation,FamilyPatientId")] Donor donor)
@@ -145,6 +152,7 @@ namespace PatientPortal.Controllers
         }
 
         // GET: Donors/Delete/5
+        [Authorize(Roles = "Admin, User")]
         public async Task<IActionResult> Delete(ulong? id)
         {
             if (id == null || _context.Donors == null)
@@ -164,6 +172,7 @@ namespace PatientPortal.Controllers
         }
 
         // POST: Donors/Delete/5
+        [Authorize(Roles = "Admin, User")]
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(ulong id)

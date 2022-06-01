@@ -7,8 +7,8 @@ namespace PatientPortal.Models
 {
     public partial class PatientPortalContext : DbContext
     {
-        public IConfigurationRoot Configuration { get; }
-
+         public IConfigurationRoot Configuration { get; }
+       
         public PatientPortalContext()
         {
         }
@@ -73,6 +73,8 @@ namespace PatientPortal.Models
                 entity.HasIndex(e => e.PatientId, "PatientId_UNIQUE")
                     .IsUnique();
 
+                entity.HasIndex(e => e.PatientUserId, "PatientUserId_idx");
+
                 entity.Property(e => e.BloodType).HasColumnType("enum('A','B','AB','O')");
 
                 entity.Property(e => e.City).HasMaxLength(100);
@@ -86,6 +88,12 @@ namespace PatientPortal.Models
                 entity.Property(e => e.Sex).HasColumnType("enum('male','female','others')");
 
                 entity.Property(e => e.State).HasMaxLength(200);
+
+                entity.HasOne(d => d.PatientUser)
+                    .WithMany(p => p.Patients)
+                    .HasForeignKey(d => d.PatientUserId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("PatientUserId");
             });
 
             modelBuilder.Entity<Swap>(entity =>
@@ -119,27 +127,19 @@ namespace PatientPortal.Models
 
                 entity.ToTable("userinfo");
 
-                entity.HasIndex(e => e.PatientId, "PatientId_idx");
-
                 entity.HasIndex(e => e.UserId, "UserId_UNIQUE")
                     .IsUnique();
 
-                entity.Property(e => e.UserId).ValueGeneratedNever();
+                entity.HasIndex(e => e.UserName, "UserName_UNIQUE")
+                    .IsUnique();
 
-                entity.Property(e => e.EmailId).HasMaxLength(45);
+                entity.Property(e => e.EmailId).HasMaxLength(256);
 
-                entity.Property(e => e.Password).HasMaxLength(300);
+                entity.Property(e => e.Password).HasMaxLength(256);
 
                 entity.Property(e => e.PhoneNumber).HasMaxLength(45);
 
                 entity.Property(e => e.UserName).HasMaxLength(200);
-
-                
-                entity.HasOne(d => d.Patient)
-                    .WithMany(p => p.Userinfos)
-                    .HasForeignKey(d => d.PatientId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("UserPatientId");
             });
 
             OnModelCreatingPartial(modelBuilder);

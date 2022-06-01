@@ -9,11 +9,7 @@ namespace PatientPortal.Helpers
         public static byte[] GenerateSalt(int maximumSaltLength) //length of salt    
         {
             var salt = new byte[maximumSaltLength];
-            using (var random = new RNGCryptoServiceProvider())
-            {
-                random.GetNonZeroBytes(salt);
-            }
-
+            new RNGCryptoServiceProvider().GetNonZeroBytes(salt);
             return salt; ;
         }  
         public static string HashPassword(string pass, byte[] salt) //hash password with SHA256

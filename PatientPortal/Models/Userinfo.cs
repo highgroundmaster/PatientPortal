@@ -1,13 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace PatientPortal.Models
 {
     public partial class Userinfo
     {
+        public Userinfo()
+        {
+            Patients = new HashSet<Patient>();
+        }
+
         public ulong UserId { get; set; }
-        
+
         [Display(Name = "User Name")]
         public string UserName { get; set; } = null!;
 
@@ -24,8 +27,7 @@ namespace PatientPortal.Models
 
         [Display(Name = "Phone Number (WhatsApp)")]
         public string PhoneNumber { get; set; } = null!;
-        public ulong PatientId { get; set; }
-        //public string Salt { get; set; } = null!;
-        public virtual Patient Patient { get; set; } = null!;
+
+        public virtual ICollection<Patient> Patients { get; set; }
     }
 }

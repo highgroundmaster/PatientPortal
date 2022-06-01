@@ -24,6 +24,6 @@
         </div>  
         
         <div>
-            <a asp-action="Register">Not Registered? Register Here</a>
+            @Html.ActionLink("Not Registered? Register Here","Register", new { ReturnUrl = ViewBag.ReturnUrl})
         </div>
     </div>  
