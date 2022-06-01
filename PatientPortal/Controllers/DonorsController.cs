@@ -90,9 +90,8 @@ namespace PatientPortal.Controllers
                 _context.Add(donor);
 
                 await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction("Index", "Home");
             }
-            //ViewData["FamilyPatientId"] = new SelectList(_context.Patients, "PatientId", "PatientId", donor.FamilyPatientId);
             return View(donor);
         }
 

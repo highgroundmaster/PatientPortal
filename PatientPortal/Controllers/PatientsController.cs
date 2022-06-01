@@ -94,7 +94,7 @@ namespace PatientPortal.Controllers
                 {
                     return RedirectToAction("Create", "Donors", new { familyPatientId = patient.PatientId });
                 }
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction("Index", "Home");
             }
             return View(patient);
         }

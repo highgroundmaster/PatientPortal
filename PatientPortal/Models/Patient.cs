@@ -36,7 +36,7 @@ namespace PatientPortal.Models
         public byte[]? Reports { get; set; }
         public ulong? PatientUserId { get; set; }
 
-        public virtual Userinfo PatientUser { get; set; } = null!;
+        public virtual Userinfo? PatientUser { get; set; }
         public virtual ICollection<Donor> Donors { get; set; }
         public virtual ICollection<Swap> Swaps { get; set; }
     }
