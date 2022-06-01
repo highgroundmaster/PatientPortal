@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Configuration;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 
@@ -8,7 +7,8 @@ namespace PatientPortal.Models
 {
     public partial class PatientPortalContext : DbContext
     {
-        public IConfigurationRoot Configuration { get; }
+         public IConfigurationRoot Configuration { get; }
+      
         public PatientPortalContext()
         {
         }
@@ -21,13 +21,14 @@ namespace PatientPortal.Models
         public virtual DbSet<Donor> Donors { get; set; } = null!;
         public virtual DbSet<Patient> Patients { get; set; } = null!;
         public virtual DbSet<Swap> Swaps { get; set; } = null!;
+        public virtual DbSet<Userinfo> Userinfos { get; set; } = null!;
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (!optionsBuilder.IsConfigured)
             {
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
-                optionsBuilder.UseMySql(Configuration.GetConnectionString("Default"), Microsoft.EntityFrameworkCore.ServerVersion.Parse("8.0.29-mysql"));
+                 optionsBuilder.UseMySql(Configuration.GetConnectionString("Default"), Microsoft.EntityFrameworkCore.ServerVersion.Parse("8.0.29-mysql"));
             }
         }
 
@@ -72,6 +73,8 @@ namespace PatientPortal.Models
                 entity.HasIndex(e => e.PatientId, "PatientId_UNIQUE")
                     .IsUnique();
 
+                entity.HasIndex(e => e.PatientUserId, "PatientUserId_idx");
+
                 entity.Property(e => e.BloodType).HasColumnType("enum('A','B','AB','O')");
 
                 entity.Property(e => e.City).HasMaxLength(100);
@@ -85,6 +88,11 @@ namespace PatientPortal.Models
                 entity.Property(e => e.Sex).HasColumnType("enum('male','female','others')");
 
                 entity.Property(e => e.State).HasMaxLength(200);
+
+                entity.HasOne(d => d.PatientUser)
+                    .WithMany(p => p.Patients)
+                    .HasForeignKey(d => d.PatientUserId)
+                    .HasConstraintName("PatientUserId");
             });
 
             modelBuilder.Entity<Swap>(entity =>
@@ -109,6 +117,28 @@ namespace PatientPortal.Models
                     .HasForeignKey(d => d.PatientId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("PatientId");
+            });
+
+            modelBuilder.Entity<Userinfo>(entity =>
+            {
+                entity.HasKey(e => e.UserId)
+                    .HasName("PRIMARY");
+
+                entity.ToTable("userinfo");
+
+                entity.HasIndex(e => e.UserId, "UserId_UNIQUE")
+                    .IsUnique();
+
+                entity.HasIndex(e => e.UserName, "UserName_UNIQUE")
+                    .IsUnique();
+
+                entity.Property(e => e.EmailId).HasMaxLength(256);
+
+                entity.Property(e => e.Password).HasMaxLength(256);
+
+                entity.Property(e => e.PhoneNumber).HasMaxLength(45);
+
+                entity.Property(e => e.UserName).HasMaxLength(200);
             });
 
             OnModelCreatingPartial(modelBuilder);

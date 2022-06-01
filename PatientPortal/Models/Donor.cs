@@ -5,14 +5,14 @@ using System.ComponentModel.DataAnnotations;
 
 namespace PatientPortal.Models
 {
-    public partial class Donor
-    {
-        public Donor()
-        {
-            Swaps = new HashSet<Swap>();
-        }
+	public partial class Donor
+	{
+		public Donor()
+		{
+			Swaps = new HashSet<Swap>();
+		}
 
-        public ulong DonorId { get; set; }
+		public ulong DonorId { get; set; }
 
 		[StringLength(200)]
 		public string Name { get; set; } = null!;
@@ -37,11 +37,11 @@ namespace PatientPortal.Models
 
 		[DonorRelationshipValidation]
 		public string PatientRelation { get; set; } = null!;
-        public ulong? FamilyPatientId { get; set; }
+		public ulong? FamilyPatientId { get; set; }
 
-        public virtual Patient? FamilyPatient { get; set; }
-        public virtual ICollection<Swap> Swaps { get; set; }
-    }
+		public virtual Patient? FamilyPatient { get; set; }
+		public virtual ICollection<Swap> Swaps { get; set; }
+	}
 
 
 	public class DonorBloodTypeValidation : ValidationAttribute

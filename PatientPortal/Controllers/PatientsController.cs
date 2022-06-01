@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using PatientPortal.Models;
 
@@ -19,14 +15,15 @@ namespace PatientPortal.Controllers
         }
 
         // GET: Patients
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Index()
         {
-              return _context.Patients != null ? 
-                          View(await _context.Patients.ToListAsync()) :
-                          Problem("Entity set 'PatientPortalContext.Patients'  is null.");
+            var patientPortalContext = _context.Patients.Include(d => d.PatientUser);
+            return View(await patientPortalContext.ToListAsync());
         }
 
         // GET: Patients/Details/5
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Details(ulong? id)
         {
             if (id == null || _context.Patients == null)
@@ -44,35 +41,67 @@ namespace PatientPortal.Controllers
             return View(patient);
         }
 
+
         // GET: Patients/Create
-        public IActionResult Create()
+        [Authorize(Roles ="Admin, User")]
+        public async Task<IActionResult> Create()
         {
+            if (TempData["UserId"] != null)
+            {
+                if (_context.Userinfos == null)
+                {
+                    return NotFound();
+                }
+
+                var user = await _context.Userinfos.FirstOrDefaultAsync(m => m.UserName == User.Identity.Name);
+                if (user == null)
+                {
+                    return NotFound();
+                }
+               
+            }
+
             return View();
         }
 
         // POST: Patients/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        [Authorize(Roles = "Admin, User")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(string IsFamilyDonorAvailable, [Bind("PatientId,Name,Sex,Age,BloodType,PastHistory,City,State,Reports")] Patient patient)
         {
+            Console.WriteLine("Reached Patient Create POST");
+            
+            var user = await _context.Userinfos.FirstOrDefaultAsync(m => m.UserName == User.Identity.Name.ToString());
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            patient.PatientUser = user;
+            patient.PatientUserId = user.UserId;
+
             if (ModelState.IsValid)
             {
+                Console.WriteLine($"Model State Valid - user - {user.UserId}");
                 _context.Add(patient);
-                
+
                 await _context.SaveChangesAsync();
 
                 if (Convert.ToBoolean(IsFamilyDonorAvailable))
                 {
                     return RedirectToAction("Create", "Donors", new { familyPatientId = patient.PatientId });
                 }
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction("Index", "Home");
             }
             return View(patient);
         }
 
+
         // GET: Patients/Edit/5
+        [Authorize(Roles = "Admin, User")]
         public async Task<IActionResult> Edit(ulong? id)
         {
             if (id == null || _context.Patients == null)
@@ -91,6 +120,7 @@ namespace PatientPortal.Controllers
         // POST: Patients/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        [Authorize(Roles = "Admin, User")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(ulong id, [Bind("PatientId,Name,Sex,Age,BloodType,PastHistory,City,State,Reports")] Patient patient)
@@ -124,6 +154,7 @@ namespace PatientPortal.Controllers
         }
 
         // GET: Patients/Delete/5
+        [Authorize(Roles = "Admin, User")]
         public async Task<IActionResult> Delete(ulong? id)
         {
             if (id == null || _context.Patients == null)
@@ -142,6 +173,7 @@ namespace PatientPortal.Controllers
         }
 
         // POST: Patients/Delete/5
+        [Authorize(Roles = "Admin, User")]
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(ulong id)
@@ -155,14 +187,14 @@ namespace PatientPortal.Controllers
             {
                 _context.Patients.Remove(patient);
             }
-            
+
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
         private bool PatientExists(ulong id)
         {
-          return (_context.Patients?.Any(e => e.PatientId == id)).GetValueOrDefault();
+            return (_context.Patients?.Any(e => e.PatientId == id)).GetValueOrDefault();
         }
     }
 }

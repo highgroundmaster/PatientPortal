@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace PatientPortal.Models
 {
@@ -37,7 +34,9 @@ namespace PatientPortal.Models
         [StringLength(100)]
         public string State { get; set; } = null!;
         public byte[]? Reports { get; set; }
+        public ulong? PatientUserId { get; set; }
 
+        public virtual Userinfo? PatientUser { get; set; }
         public virtual ICollection<Donor> Donors { get; set; }
         public virtual ICollection<Swap> Swaps { get; set; }
     }
@@ -69,3 +68,4 @@ namespace PatientPortal.Models
         }
     }
 }
+
