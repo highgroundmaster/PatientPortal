@@ -6,9 +6,6 @@
 
 <h1>Index</h1>
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
 <table class="table">
     <thead>
         <tr>
@@ -34,11 +31,12 @@
                 @Html.DisplayNameFor(model => model.State)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.PatientRelation)
+                @Html.DisplayNameFor(model => model.FamilyPatient.Name)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.FamilyPatient)
+                @Html.DisplayNameFor(model => model.PatientRelation)
             </th>
+            
             <th></th>
         </tr>
     </thead>
@@ -67,10 +65,10 @@
                 @Html.DisplayFor(modelItem => item.State)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.PatientRelation)
+                @Html.DisplayFor(modelItem => item.FamilyPatient.Name)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.FamilyPatientId)
+                @Html.DisplayFor(modelItem => item.PatientRelation)
             </td>
             <td>
                 <a asp-action="Edit" asp-route-id="@item.DonorId">Edit</a> |

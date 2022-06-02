@@ -27,8 +27,7 @@ namespace PatientPortal.Models
         {
             if (!optionsBuilder.IsConfigured)
             {
-#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
-                 optionsBuilder.UseMySql(Configuration.GetConnectionString("Default"), Microsoft.EntityFrameworkCore.ServerVersion.Parse("8.0.29-mysql"));
+#warning         optionsBuilder.UseMySql(Configuration.GetConnectionString("Default"), Microsoft.EntityFrameworkCore.ServerVersion.Parse("8.0.29-mysql"));
             }
         }
 
@@ -137,6 +136,8 @@ namespace PatientPortal.Models
                 entity.Property(e => e.Password).HasMaxLength(256);
 
                 entity.Property(e => e.PhoneNumber).HasMaxLength(45);
+
+                entity.Property(e => e.Role).HasColumnType("enum('SuperAdmin','Admin','User')");
 
                 entity.Property(e => e.UserName).HasMaxLength(200);
             });

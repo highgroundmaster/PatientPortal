@@ -35,51 +35,50 @@ namespace PatientPortal.Controllers
 
         [ValidateAntiForgeryToken]
         [HttpPost]
-        public async Task<IActionResult> Register([Bind("UserId,UserName,EmailId,Password,PhoneNumber")] Userinfo user)
+        public async Task<IActionResult> Register([Bind("UserId,UserName,EmailId,Password,PhoneNumber,Role")] Userinfo user)
         {
-            if (TempData.Peek("ReturnUrl") != null)
+            ModelState.Remove("Role");
+            if (ModelState.IsValid)
             {
-                string ReturnUrl = TempData["ReturnUrl"] as string;
-
-                if (ModelState.IsValid)
+                // TODO - Changing Admin Authentication
+                var existingUser = await _context.Userinfos.FirstOrDefaultAsync(m => m.UserName == user.UserName);
+                if (existingUser == null)
                 {
-                    // TODO - Changing Admin Authentication
-                    var existingUser = await _context.Userinfos.FirstOrDefaultAsync(m => m.UserName == user.UserName);
-                    if (existingUser == null)
-                    {
-                        string role = user.UserName.Contains("jivandeep.org") ? "Admin": "User";
-                        // 16 Bytes Salt
-                        byte[] salt = UserPasswordHelper.GenerateSalt(16);
+                    user.Role = user.EmailId.Contains("jivandeep.org") ? "Admin": "User";
                         
-                        // derive a 256-bit subkey (use HMACSHA256 with 100,000 iterations)
-                        // First 24 Characters is Salt
-                        user.Password = Convert.ToBase64String(salt) + UserPasswordHelper.HashPassword(user.Password, salt);
-                        //Create the identity for the user  
-                        var identity = new ClaimsIdentity(new[] {
-                        new Claim(ClaimTypes.Name, user.UserName),
-                        new Claim(ClaimTypes.Role, role)
-                    }, CookieAuthenticationDefaults.AuthenticationScheme);
+                    // 16 Bytes Salt
+                    byte[] salt = UserPasswordHelper.GenerateSalt(16);
+                        
+                    // derive a 256-bit subkey (use HMACSHA256 with 100,000 iterations)
+                    // First 24 Characters is Salt
+                    user.Password = Convert.ToBase64String(salt) + UserPasswordHelper.HashPassword(user.Password, salt);
+                    //Create the identity for the user  
+                    var identity = new ClaimsIdentity(new[] {
+                    new Claim(ClaimTypes.Name, user.UserName),
+                    new Claim(ClaimTypes.Role, user.Role)
+                }, CookieAuthenticationDefaults.AuthenticationScheme);
 
-                        var principal = new ClaimsPrincipal(identity);
+                    var principal = new ClaimsPrincipal(identity);
 
-                        var login = HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
+                    var login = HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
 
-                        _context.Add(user);
-                        await _context.SaveChangesAsync();
-                        ModelState.Clear();
+                    _context.Add(user);
+                    await _context.SaveChangesAsync();
+                    ModelState.Clear();
 
+                    string ReturnUrl = TempData["ReturnUrl"] as string;
+                    if (!String.IsNullOrEmpty(ReturnUrl) && Url.IsLocalUrl(ReturnUrl))
+                    {
+                        TempData["UserId"] = user.UserId.ToString();
 
-                        if (!String.IsNullOrEmpty(ReturnUrl) && Url.IsLocalUrl(ReturnUrl))
-                        {
-                            TempData["UserId"] = user.UserId.ToString();
-
-                            return Redirect(ReturnUrl);
-                        }
-                        else
-                            return RedirectToAction("Index", "Home");
+                        return Redirect(ReturnUrl);
                     }
-                    ViewBag.ErrorMessage = "User name already registered";
-
+                    else
+                        return RedirectToAction("Index", "Home");
+                }
+                else
+                {
+                    ModelState.AddModelError(String.Empty, "User name already registered");
                 }
 
             }
@@ -100,57 +99,60 @@ namespace PatientPortal.Controllers
         [HttpPost]
         public async Task<IActionResult> Login(string userName, string password)
         {
-            if (TempData.Peek("ReturnUrl") != null)
+            var existingUser = await _context.Userinfos.FirstOrDefaultAsync(m => m.UserName == userName);
+            if (existingUser != null)
             {
-                string ReturnUrl = TempData["ReturnUrl"] as string;
+                // First 24 Characters is Salt
+                byte[] salt = Convert.FromBase64String(existingUser.Password.Substring(0, 24));
 
-                var existingUser = await _context.Userinfos.FirstOrDefaultAsync(m => m.UserName == userName);
-                if (existingUser != null)
-                {
-                    // First 24 Characters is Salt
-                    byte[] salt = Convert.FromBase64String(existingUser.Password.Substring(0, 24));
-
-                    string dbPassword = existingUser.Password.Substring(24);
+                string dbPassword = existingUser.Password.Substring(24);
                     
-                    // derive a 256-bit subkey (use HMACSHA256 with 100,000 iterations)
-                    string userPassword = UserPasswordHelper.HashPassword(password, salt);
+                // derive a 256-bit subkey (use HMACSHA256 with 100,000 iterations)
+                string userPassword = UserPasswordHelper.HashPassword(password, salt);
 
-                    if (string.Equals(userPassword, dbPassword))
-                    {
-                        //Create the identity for the user  
-                        var identity = new ClaimsIdentity(new[] {
-                            new Claim(ClaimTypes.Name, existingUser.UserName)
-                        }, CookieAuthenticationDefaults.AuthenticationScheme);
+                if (string.Equals(userPassword, dbPassword))
+                {
+                    //Create the identity for the user  
+                    var identity = new ClaimsIdentity(new[] {
+                        new Claim(ClaimTypes.Name, existingUser.UserName),
+                        new Claim(ClaimTypes.Role, existingUser.Role)
+                    }, CookieAuthenticationDefaults.AuthenticationScheme);
 
-                        var principal = new ClaimsPrincipal(identity);
+                    var principal = new ClaimsPrincipal(identity);
 
-                        var login = HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
+                    await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
 
-                    }
-                    ViewBag.ErrorMessage = "Password Incorrect";
-
-
-                    if (!String.IsNullOrEmpty(ReturnUrl) && Url.IsLocalUrl(ReturnUrl))
-                    {
-                        TempData["UserId"] = existingUser.UserId.ToString();
-
-                        return Redirect(ReturnUrl);
-                    }
-                    else
-                        return RedirectToAction("Index", "Home");
                 }
+                else
+                {
+                    ModelState.AddModelError(String.Empty,"Password Incorrect");
+                    return View();
+                }
+
+                string ReturnUrl = TempData["ReturnUrl"] as string;
+                if (!String.IsNullOrEmpty(ReturnUrl) && Url.IsLocalUrl(ReturnUrl))
+                {
+                    TempData["UserId"] = existingUser.UserId.ToString();
+
+                    return Redirect(ReturnUrl);
+                }
+                else
+                    return RedirectToAction("Index", "Home");
             }
-            ViewBag.ErrorMessage = "User not registered";
+            else
+            {
+                ModelState.AddModelError(String.Empty, "Username Not Registered");
+                return View();
+            }
 
             return View();
         }
 
 
-        [HttpPost]
         public IActionResult Logout()
         {
             var login = HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-            return RedirectToAction("Login");
+            return RedirectToAction("Index", "Home");
         }
     }
 }

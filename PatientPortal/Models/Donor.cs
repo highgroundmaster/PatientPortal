@@ -24,9 +24,11 @@ namespace PatientPortal.Models
 		public int Age { get; set; }
 
 		[DonorBloodTypeValidation]
+		[Display(Name = "Blood Type")]
 		public string BloodType { get; set; } = null!;
 
 		[StringLength(300)]
+		[Display(Name = "Past History")]
 		public string? PastHistory { get; set; }
 
 		[StringLength(100)]
@@ -36,10 +38,11 @@ namespace PatientPortal.Models
 		public string State { get; set; } = null!;
 
 		[DonorRelationshipValidation]
+		[Display(Name = "Relationship with Patient")]
 		public string PatientRelation { get; set; } = null!;
-		public ulong? FamilyPatientId { get; set; }
+		public ulong FamilyPatientId { get; set; }
 
-		public virtual Patient? FamilyPatient { get; set; }
+		public virtual Patient FamilyPatient { get; set; } = null!;
 		public virtual ICollection<Swap> Swaps { get; set; }
 	}
 
