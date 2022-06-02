@@ -16,11 +16,15 @@ namespace PatientPortal.Controllers
         }
 
         // GET: Donors
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin, User")]
         public async Task<IActionResult> Index()
         {
+            var user = await _context.Userinfos.FirstOrDefaultAsync(m => m.UserName == User.Identity.Name);
             var patientPortalContext = _context.Donors.Include(d => d.FamilyPatient);
+            if (user.Role == "User")
+                return View(await patientPortalContext.Where(m => m.FamilyPatient.PatientUserId == user.UserId).ToListAsync());
             return View(await patientPortalContext.ToListAsync());
+
         }
 
         // GET: Donors/Details/5
@@ -28,17 +32,18 @@ namespace PatientPortal.Controllers
         public async Task<IActionResult> Details(ulong? id)
         {
             if (id == null || _context.Donors == null)
-            {
                 return NotFound();
-            }
-
+            
             var donor = await _context.Donors
                 .Include(d => d.FamilyPatient)
                 .FirstOrDefaultAsync(m => m.DonorId == id);
-            if (donor == null)
-            {
+            
+            var user = await _context.Userinfos.FirstOrDefaultAsync(m => m.UserName == User.Identity.Name);
+            if (donor == null || user == null)
                 return NotFound();
-            }
+
+            if (donor.FamilyPatient.PatientUserId != user.UserId)
+                return StatusCode(StatusCodes.Status403Forbidden);
 
             return View(donor);
         }
@@ -85,12 +90,16 @@ namespace PatientPortal.Controllers
                 donor.FamilyPatient = patient;
 
             }
+
+            ModelState.Remove("FamilyPatientId");
+            ModelState.Remove("FamilyPatient");
+
             if (ModelState.IsValid)
             {
                 _context.Add(donor);
 
                 await _context.SaveChangesAsync();
-                return RedirectToAction("Index", "Home");
+                return RedirectToAction("Details", "Donors", new {id = donor.DonorId});
             }
             return View(donor);
         }
@@ -104,7 +113,15 @@ namespace PatientPortal.Controllers
                 return NotFound();
             }
 
-            var donor = await _context.Donors.FindAsync(id);
+            var donor = await _context.Donors.Include(d => d.FamilyPatient).FirstOrDefaultAsync(m => m.DonorId == id);
+
+            var user = await _context.Userinfos.FirstOrDefaultAsync(m => m.UserName == User.Identity.Name);
+            if (donor == null || user == null)
+                return NotFound();
+
+            if (donor.FamilyPatient.PatientUserId != user.UserId)
+                return StatusCode(StatusCodes.Status403Forbidden);
+
             if (donor == null)
             {
                 return NotFound();

@@ -28,6 +28,8 @@ namespace PatientPortal.Models
         [Display(Name = "Phone Number (WhatsApp)")]
         public string PhoneNumber { get; set; } = null!;
 
+        public string Role { get; set; }
+
         public virtual ICollection<Patient> Patients { get; set; }
     }
 }

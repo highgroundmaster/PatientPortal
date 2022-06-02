@@ -15,15 +15,18 @@ namespace PatientPortal.Controllers
         }
 
         // GET: Patients
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin, User")]
         public async Task<IActionResult> Index()
         {
+            var user = await _context.Userinfos.FirstOrDefaultAsync(m => m.UserName == User.Identity.Name);
             var patientPortalContext = _context.Patients.Include(d => d.PatientUser);
+            if (user.Role == "User")
+                return View(await patientPortalContext.Where(m => m.PatientUserId == user.UserId).ToListAsync());
             return View(await patientPortalContext.ToListAsync());
         }
 
         // GET: Patients/Details/5
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin, User")]
         public async Task<IActionResult> Details(ulong? id)
         {
             if (id == null || _context.Patients == null)
@@ -31,12 +34,14 @@ namespace PatientPortal.Controllers
                 return NotFound();
             }
 
-            var patient = await _context.Patients
-                .FirstOrDefaultAsync(m => m.PatientId == id);
-            if (patient == null)
-            {
+            var patient = await _context.Patients.FindAsync(id);
+
+            var user = await _context.Userinfos.FirstOrDefaultAsync(m => m.UserName == User.Identity.Name);
+            if (patient == null || user == null)
                 return NotFound();
-            }
+
+            if (patient.PatientUserId != user.UserId)
+                return StatusCode(StatusCodes.Status403Forbidden);
 
             return View(patient);
         }
@@ -70,11 +75,9 @@ namespace PatientPortal.Controllers
         [Authorize(Roles = "Admin, User")]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(string IsFamilyDonorAvailable, [Bind("PatientId,Name,Sex,Age,BloodType,PastHistory,City,State,Reports")] Patient patient)
-        {
-            Console.WriteLine("Reached Patient Create POST");
-            
-            var user = await _context.Userinfos.FirstOrDefaultAsync(m => m.UserName == User.Identity.Name.ToString());
+        public async Task<IActionResult> Create([Bind("PatientId,Name,Sex,Age,BloodType,PastHistory,City,State,Reports")] Patient patient, bool IsFamilyDonorAvailable = false)
+        { 
+            var user = await _context.Userinfos.FirstOrDefaultAsync(m => m.UserName == User.Identity.Name);
             if (user == null)
             {
                 return NotFound();
@@ -83,18 +86,19 @@ namespace PatientPortal.Controllers
             patient.PatientUser = user;
             patient.PatientUserId = user.UserId;
 
+            ModelState.Remove("PatientUser");
+            ModelState.Remove("PatientUserId");
+
             if (ModelState.IsValid)
             {
-                Console.WriteLine($"Model State Valid - user - {user.UserId}");
                 _context.Add(patient);
 
                 await _context.SaveChangesAsync();
 
-                if (Convert.ToBoolean(IsFamilyDonorAvailable))
-                {
+                if (IsFamilyDonorAvailable)
                     return RedirectToAction("Create", "Donors", new { familyPatientId = patient.PatientId });
-                }
-                return RedirectToAction("Index", "Home");
+
+                return RedirectToAction("Details", "Patients", new {id = patient.PatientId});
             }
             return View(patient);
         }
@@ -105,16 +109,18 @@ namespace PatientPortal.Controllers
         public async Task<IActionResult> Edit(ulong? id)
         {
             if (id == null || _context.Patients == null)
-            {
                 return NotFound();
-            }
-
             var patient = await _context.Patients.FindAsync(id);
-            if (patient == null)
-            {
+            
+            var user = await _context.Userinfos.FirstOrDefaultAsync(m => m.UserName == User.Identity.Name);
+            if (patient == null || user == null)
                 return NotFound();
-            }
+
+            if (patient.PatientUserId != user.UserId)
+                return StatusCode(StatusCodes.Status403Forbidden);
+            
             return View(patient);
+
         }
 
         // POST: Patients/Edit/5
@@ -164,10 +170,13 @@ namespace PatientPortal.Controllers
 
             var patient = await _context.Patients
                 .FirstOrDefaultAsync(m => m.PatientId == id);
-            if (patient == null)
-            {
+            var user = await _context.Userinfos.FirstOrDefaultAsync(m => m.UserName == User.Identity.Name);
+            
+            if (patient == null || user == null)
                 return NotFound();
-            }
+
+            if (patient.PatientUserId != user.UserId)
+                return StatusCode(StatusCodes.Status403Forbidden);
 
             return View(patient);
         }
@@ -183,6 +192,12 @@ namespace PatientPortal.Controllers
                 return Problem("Entity set 'PatientPortalContext.Patients'  is null.");
             }
             var patient = await _context.Patients.FindAsync(id);
+            var user = await _context.Userinfos.FirstOrDefaultAsync(m => m.UserName == User.Identity.Name);
+            if (patient == null || user == null)
+                return NotFound();
+
+            if (patient.PatientUserId != user.UserId)
+                return StatusCode(StatusCodes.Status403Forbidden);
             if (patient != null)
             {
                 _context.Patients.Remove(patient);

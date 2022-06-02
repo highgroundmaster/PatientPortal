@@ -21,10 +21,12 @@ namespace PatientPortal.Models
         [Range(0, 150, ErrorMessage = "The Age should be between 0 and 150 years")]
         public int Age { get; set; }
 
+        [Display(Name = "Blood Type")]
         [PatientBloodTypeValidation]
         public string BloodType { get; set; } = null!;
 
         [StringLength(300)]
+        [Display(Name = "Past History")]
         public string? PastHistory { get; set; }
 
 
@@ -34,9 +36,10 @@ namespace PatientPortal.Models
         [StringLength(100)]
         public string State { get; set; } = null!;
         public byte[]? Reports { get; set; }
-        public ulong? PatientUserId { get; set; }
+        public ulong PatientUserId { get; set; }
 
-        public virtual Userinfo? PatientUser { get; set; }
+        [Display(Name = "Patient Related to")]
+        public virtual Userinfo PatientUser { get; set; } = null!;
         public virtual ICollection<Donor> Donors { get; set; }
         public virtual ICollection<Swap> Swaps { get; set; }
     }
